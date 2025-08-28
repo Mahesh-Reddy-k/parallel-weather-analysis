@@ -40,11 +40,12 @@ Spatial coverage was subset to **India** (lat: 5°–38°N, lon: 68°–98°E).
   - Data split along **time dimension**.  
   - Each MPI rank loads its own time slice of all variables.  
   - Preprocessing performed per rank:  
-    - Unit conversions  
-    - Daily resampling (mean/sum)  
-    - Deriving new variables (e.g., wind speed)  
+    - Unit conversions (K → °C; precipitation to mm/day)  
+    - Daily resampling (mean for temp/wind, sum for precip)  
+    - Deriving new variables (10 m wind speed = √(U² + V²))  
   - Ranks write partial outputs (`.partXXXX.nc`).  
-  - **Rank 0** concatenates parts into final datasets.  
+  - **Rank 0** concatenates parts into final datasets. 
+
 
 ### 2. Verification  
 - Loaded preprocessed outputs using **xarray**.  
