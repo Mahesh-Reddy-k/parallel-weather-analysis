@@ -1,65 +1,93 @@
 # Parallel Weather Data Analysis and Visualization System  
 
 ## Team A10  
-- Chaitanya Mahesh – [CB.AI.U4AID23058]  
-- Mahesh Reddy – [CB.AI.U4AID23059]  
-- Kowshik Reddy – [CB.AI.U4AID23060]  
-- Mohith – [CB.AI.U4AID23045]  
+- **Chaitanya Mahesh** – [CB.AI.U4AID23058]  
+- **Mahesh Reddy** – [CB.AI.U4AID23059]  
+- **Kowshik Reddy** – [CB.AI.U4AID23060]  
+- **Mohith** – [CB.AI.U4AID23045]  
 
 ---
 
 ## Problem Statement  
 Climate and weather data are growing rapidly in both size and complexity, coming from satellites, sensors, and climate models.  
 Analyzing these datasets using traditional sequential methods is slow and inefficient.  
-Real-time or near-real-time insights into patterns such as temperature anomalies, precipitation extremes, or wind speed variations are critical for applications in agriculture, disaster management, and climate research.  
 
-This project builds a **parallelized, cloud-compatible system** that:  
-1. Efficiently ingests and preprocesses large-scale weather datasets (e.g., BharatBench NetCDF files).  
-2. Performs parallelized computations (e.g., monthly averages, anomalies, and spatio-temporal trends) using **Dask + Xarray**.  
-3. Provides interactive **visualizations** of weather patterns.  
-4. Supports deployment on **cloud/HPC environments** for scalability.  
+Real-time or near-real-time insights into patterns such as temperature anomalies, precipitation extremes, or wind speed variations are critical for applications in:  
+- Agriculture  
+- Disaster management  
+- Climate research  
 
-The final deliverable is an **end-to-end pipeline** that demonstrates both local parallelism and cloud-readiness for weather data analytics.  
+This project builds a **parallelized system** that leverages High-Performance Computing (HPC) to preprocess, analyze, and visualize large-scale weather datasets.  
+
+---
+
+## Dataset  
+We used the **BharatBench – IMDAA Reanalysis Dataset (1990–2020)** in **NetCDF format (`.nc`)**.  
+Key variables:  
+- **TMP_2m** → 2 m temperature (Kelvin → converted to °C)  
+- **APCP_sfc** → surface precipitation (kg m⁻² → mm/day)  
+- **UGRD_10m & VGRD_10m** → 10 m wind components (converted to wind speed magnitude)  
+
+Spatial coverage was subset to **India** (lat: 5°–38°N, lon: 68°–98°E).  
 
 ---
 
 ## Step-by-Step Procedure  
 
-### Phase 1: Data Collection & Preprocessing (Weeks 1–2)  
-- **Dataset:** BharatBench climate/weather dataset (NetCDF format).  
-- **Tools:** Xarray for structured loading, Dask for parallel processing.  
-- **Preprocessing:** Handle missing values, normalize units (°C, mm, m/s).  
-- **Storage:** Organize raw vs. processed data in a reproducible folder structure.  
+### 1. Preprocessing with MPI  
+- Implemented using **`mpi4py`**.  
+- **Parallelization strategy:**  
+  - Data split along **time dimension**.  
+  - Each MPI rank loads its own time slice of all variables.  
+  - Preprocessing performed per rank:  
+    - Unit conversions  
+    - Daily resampling (mean/sum)  
+    - Deriving new variables (e.g., wind speed)  
+  - Ranks write partial outputs (`.partXXXX.nc`).  
+  - **Rank 0** concatenates parts into final datasets.  
 
-### Phase 2: Parallelized Data Analysis (Weeks 3–4)  
-- Load data into Dask-backed Xarray objects.  
-- Compute monthly/seasonal averages in parallel.  
-- Calculate **climate anomalies** (current vs. baseline averages).  
-- Perform spatio-temporal trend analysis (linear regression over time).  
+### 2. Verification  
+- Loaded preprocessed outputs using **xarray**.  
+- Calculated national daily mean for each variable.  
+- Verified seasonal cycle of temperature (summer peaks ~25 °C, winter troughs ~12 °C).  
+- Checked dataset shape and values:  
+  - Time: 12,331 days (1990–2023)  
+  - Spatial grid: 31 lat × 28 lon  
 
-### Phase 3: Visualization & Exploration (Weeks 5–6)  
-- Visualize temperature/precipitation/wind maps (matplotlib, cartopy).  
-- Build interactive dashboards (Plotly/Streamlit).  
-- Generate time-series plots of anomalies and seasonal cycles.  
-- Export results as figures/JSON for reporting.  
+### 3. Visualization  
+- Generated time-series plots of daily national means.  
+- Created spatial maps (first-day snapshots).  
+- Example:  
+  - **t2m_c.nc** → seasonal cycle confirmed.  
+  - **prcp_daily_mm.nc** → daily accumulated precipitation.  
+  - **wind10m_speed_daily.nc** → average wind speed trends.  
 
-### Phase 4: Cloud Integration (Weeks 7–8)  
-- Run batch computations on distributed clusters (Dask on HPC / cloud).  
-- Store processed outputs in cloud storage (e.g., AWS S3 / Azure Blob).  
-- Develop API endpoints (FastAPI/Flask) for querying results.  
-- Demonstrate scalability (performance comparison: single-core vs. multi-core vs. cluster).  
-
-### Phase 5: Testing & Final Deliverables (Week 9)  
-- Validate results against known baselines.  
-- Benchmark performance improvements (execution time, memory usage).  
-- Build a simple web dashboard for demonstration.  
-- Prepare final report, pipeline diagram, and README with usage guide.  
+### 4. Performance Benchmarking (in-progress)  
+- Planned tests: `-n 1`, `-n 2`, `-n 4` MPI ranks.  
+- Measure wall-clock times and compute speedup.  
+- Expected outcome: near-linear scaling for large slices.  
 
 ---
 
 ## Deliverables  
-- Preprocessed dataset with standardized formats.  
-- Parallelized anomaly/trend detection modules.  
-- Visualization outputs (maps, time-series).  
-- Cloud-ready pipeline with performance benchmarks.  
-- Final report + dashboard/web demo.  
+1. **MPI Preprocessing Script:** `preprocess_mpi.py`  
+   - Parallel resampling and unit conversion for IMDAA NetCDF files.  
+2. **Verification Script:** `verify_outputs.py`  
+   - Loads final `.nc` files, prints dataset summaries, and produces validation plots.  
+3. **Preprocessed Datasets:**  
+   - `tmp2m_daily_c.nc` (temperature in °C)  
+   - `prcp_daily_mm.nc` (daily precipitation)  
+   - `wind10m_speed_daily.nc` (10 m wind speed in m/s)  
+4. **Sample Visualizations:**  
+   - Seasonal cycle of national average temperature (1990–1992)  
+   - Spatial heatmaps and wind vector maps (planned).  
+5. **Report & Slides:**  
+   - Problem motivation, pipeline diagram, MPI log outputs, verification plots, and scaling results.  
+
+---
+
+## Next Steps  
+- Extend analysis to compute **climatology maps** (30-year mean).  
+- Add **anomaly detection** for extreme weather events.  
+- Benchmark performance across larger node counts.  
+- Integrate visualizations into a dashboard for interactive exploration.  
