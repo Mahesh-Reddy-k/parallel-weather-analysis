@@ -47,6 +47,7 @@ Spatial coverage was subset to **India** (lat: 5°–38°N, lon: 68°–98°E).
   - **Rank 0** concatenates parts into final datasets. 
 
 
+
 ### 2. Verification  
 - Loaded preprocessed outputs using **xarray**.  
 - Calculated national daily mean for each variable.  
