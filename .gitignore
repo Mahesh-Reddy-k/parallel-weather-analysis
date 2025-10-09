@@ -60,7 +60,7 @@ Thumbs.db
 !README.md
 
 # Plots / figures auto-generated
-*.png
+
 *.jpg
 *.jpeg
 *.svg
