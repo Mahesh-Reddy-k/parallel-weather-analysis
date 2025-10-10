@@ -86,14 +86,15 @@ Spatial coverage was subset to **India** (lat: 5°–38°N, lon: 68°–98°E).
    - `wind10m_speed_daily.nc` (10 m wind speed in m/s)  
 4. **Sample Visualizations:**  
    - Seasonal cycle of national average temperature (1990–1992)  
-   - Spatial heatmaps and wind vector maps (planned).  
+   - Spatial heatmaps and wind vector maps (planned). 
+   - Extend analysis to compute **climatology maps** (30-year mean).  
+   - Add **anomaly detection** for extreme weather events.  
+   - Benchmark performance across larger node counts. 
 5. **Report & Slides:**  
    - Problem motivation, pipeline diagram, MPI log outputs, verification plots, and scaling results.  
 
 ---
 
 ## Next Steps  
-- Extend analysis to compute **climatology maps** (30-year mean).  
-- Add **anomaly detection** for extreme weather events.  
-- Benchmark performance across larger node counts.  
+
 - Integrate visualizations into a dashboard for interactive exploration.  
